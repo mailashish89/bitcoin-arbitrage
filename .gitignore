@@ -38,5 +38,6 @@ nosetests.xml
 *.json
 
 # Project
+.env
 old/
 tmp/
