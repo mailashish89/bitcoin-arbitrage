@@ -1,7 +1,6 @@
-# Copyright (C) 2013, Maxime Biais <maxime@biais.org>
-
 import logging
 from arbitrage.fiatconverter import FiatConverter
+import ccxt
 
 class TradeException(Exception):
     pass
@@ -13,6 +12,9 @@ class Market:
         self.eur_balance = 0.
         self.usd_balance = 0.
         self.fc = FiatConverter()
+        #self.currency = 
+        #self.ccxt_market = 
+        self.get_info() # updates balances
 
     def __str__(self):
         return "%s: %s" % (self.name, str({"btc_balance": self.btc_balance,
@@ -35,16 +37,22 @@ class Market:
         self._sell(amount, local_currency_price)
 
     def _buy(self, amount, price):
-        raise NotImplementedError("%s.sell(self, amount, price)" % self.name)
+        #TODO deal with errors
+        self.ccxt_market.create_limit_buy_order("BTC/USD",amount,price)
 
     def _sell(self, amount, price):
-        raise NotImplementedError("%s.sell(self, amount, price)" % self.name)
+        #TODO deal with errors
+        self.ccxt_market.create_market_sell_order("BTC/USD",amount)
 
     def deposit(self):
         raise NotImplementedError("%s.sell(self, amount, price)" % self.name)
 
     def withdraw(self, amount, address):
         raise NotImplementedError("%s.sell(self, amount, price)" % self.name)
-
+        
     def get_info(self):
-        raise NotImplementedError("%s.sell(self, amount, price)" % self.name)
+        """Get balance"""
+        #This just gets the balance available for trading, not the total balance.
+        self.btc_balance = float(self.ccxt_market.fetch_balance()["free"].get("BTC"))
+        self.usd_balance = float(self.ccxt_market.fetch_balance()["free"].get("USD"))
+        self.eur_balance = float(self.ccxt_market.fetch_balance()["free"].get("EUR"))

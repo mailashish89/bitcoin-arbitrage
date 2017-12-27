@@ -34,12 +34,11 @@ refresh_rate = int(os.environ["REFRESH_RATE"])
 #### Trader Bot Config
 # Access to Private APIs
 
-paymium_username = "FIXME"
-paymium_password = "FIXME"
-paymium_address = "FIXME"  # to deposit btc from markets / wallets
+paymium_api_key = "FIXME"
+paymium_secret = "FIXME"
 
-bitstamp_username = "FIXME"
-bitstamp_password = "FIXME"
+bitstamp_api_key = "FIXME"
+bitstamp_secret = "FIXME"
 
 # SafeGuards
 max_tx_volume = 10  # in BTC
