@@ -4,14 +4,16 @@ import time
 from arbitrage.observers.observer import Observer
 from arbitrage.observers.emailer import send_email
 from arbitrage.fiatconverter import FiatConverter
+import importlib
 
 
 class TraderBot(Observer):
     def __init__(self):
-        self.clients = {
-            # TODO: move that to the config file
-            # "BitstampUSD": bitstampusd.PrivateBitstampUSD(),
-        }
+        self.clients={}
+        for client in config.clients:
+            importlib.import_module("arbitrage.private_markets.{}".format(client.lower()))
+            #TODO make this less hacky
+            self.clients[client] = eval("arbitrage.private_markets.{}.Private{}()".format(client.lower(), client))
         self.fc = FiatConverter()
         self.trade_wait = 120  # in seconds
         self.last_trade = 0

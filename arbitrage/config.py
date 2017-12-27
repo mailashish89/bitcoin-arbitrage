@@ -1,5 +1,6 @@
 import os
 
+# This is imported into the arbitrer and used to import the relevent modules from public_markets.
 markets = [
     "BitfinexEUR",
     "BitfinexUSD",
@@ -15,7 +16,14 @@ markets = [
     "PaymiumEUR"
 ]
 
+# This is imported into the tradeBot and used to import the relevent modules from private_markets.
+clients = [
+    "BitstampUSD",
+    "Paymium"
+]
+
 # observers if any
+# This is imported into the arbitrer and used to import the relevent modules.
 # ["Logger", "DetailedLogger", "TraderBot", "TraderBotSim", "HistoryDumper", "Emailer"]
 observers = ["Logger"]
 
