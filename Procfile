@@ -1,1 +1,1 @@
-bot: pipenv run python -m arbitrage
+bot: python -m arbitrage
