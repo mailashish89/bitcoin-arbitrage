@@ -1,6 +1,6 @@
 import logging
-import config
 import time
+from arbitrage import config
 from arbitrage.observers.observer import Observer
 from arbitrage.observers.emailer import send_email
 from arbitrage.fiatconverter import FiatConverter
@@ -11,9 +11,9 @@ class TraderBot(Observer):
     def __init__(self):
         self.clients={}
         for client in config.clients:
-            importlib.import_module("arbitrage.private_markets.{}".format(client.lower()))
-            #TODO make this less hacky
-            self.clients[client] = eval("arbitrage.private_markets.{}.Private{}()".format(client.lower(), client))
+            client_module = importlib.import_module("arbitrage.private_markets.{}".format(client.lower()))
+            client_class = getattr(client_module,"Private{}".format(client))
+            self.clients[client] = client_class()
         self.fc = FiatConverter()
         self.trade_wait = 120  # in seconds
         self.last_trade = 0

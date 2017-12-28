@@ -1,6 +1,6 @@
 import logging
 from arbitrage.observers.observer import Observer
-import config
+from arbitrage import config
 import smtplib
 
 
