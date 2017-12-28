@@ -39,7 +39,7 @@ class ArbitrerCLI:
                 module = __import__("arbitrage.public_markets." + module_name)
                 test = eval('module.public_markets.' + module_name)
                 for name, obj in inspect.getmembers(test):
-                    if inspect.isclass(obj) and 'Market' in (j.__name__ for j in obj.mro()[1:]):
+                    if inspect.isclass(obj) and ('Market' in (j.__name__ for j in obj.mro()[1:]) or 'MarketCcxt' in (j.__name__ for j in obj.mro()[1:])):
                         if not obj.__module__.split('.')[-1].startswith('_'):
                             markets.append(obj.__name__)
         markets.sort()
