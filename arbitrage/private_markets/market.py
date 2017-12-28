@@ -53,6 +53,14 @@ class Market:
     def get_info(self):
         """Get balance"""
         #This just gets the balance available for trading, not the total balance.
-        self.btc_balance = float(self.ccxt_market.fetch_balance()["free"].get("BTC"))
-        self.usd_balance = float(self.ccxt_market.fetch_balance()["free"].get("USD"))
-        self.eur_balance = float(self.ccxt_market.fetch_balance()["free"].get("EUR"))
+        self.btc_balance = self._get_currency_balance("BTC")
+        self.usd_balance = self._get_currency_balance("USD")
+        self.eur_balance = self._get_currency_balance("EUR")
+        
+    def _get_currency_balance(self, currency_code):
+        try:
+            balance = self.ccxt_market.fetch_balance()["free"][currency_code]
+            balance = float(balance)
+        except KeyError:
+            balance = 0.0
+        return balance
