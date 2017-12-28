@@ -24,6 +24,9 @@ paymium_secret = "FIXME"
 bitstamp_api_key = "FIXME"
 bitstamp_secret = "FIXME"
 
+kraken_api_key = os.environ["KRAKEN_API_KEY"]
+kraken_secret = os.environ["KRAKEN_SECRET"]
+
 # SafeGuards
 max_tx_volume = 10  # in BTC
 min_tx_volume = 1  # in BTC
