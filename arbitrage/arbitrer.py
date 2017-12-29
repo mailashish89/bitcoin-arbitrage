@@ -45,23 +45,32 @@ class Arbitrer(object):
            >= self.depths[kbid]["bids"][mj]["price"]:
             return 0, 0, 0, 0
 
+        # add up the amount (aka volume) below mi
         max_amount_buy = 0
         for i in range(mi + 1):
             max_amount_buy += self.depths[kask]["asks"][i]["amount"]
+        # add up amount above mj
         max_amount_sell = 0
         for j in range(mj + 1):
             max_amount_sell += self.depths[kbid]["bids"][j]["amount"]
+        # get the lowest to find how much we can actually buy and sell
         max_amount = min(max_amount_buy, max_amount_sell, config.max_tx_volume)
 
         buy_total = 0
         w_buyprice = 0
+        # sum up the amounts in the orders up to the mi order, capping it at max_amount (calculated above)
+        # loop through asks up to mi order
         for i in range(mi + 1):
+            # extract order price
             price = self.depths[kask]["asks"][i]["price"]
+            
             amount = min(max_amount, buy_total + self.depths[
                          kask]["asks"][i]["amount"]) - buy_total
             if amount <= 0:
                 break
             buy_total += amount
+            
+            # compute weighted_price. start off with price of first order
             if w_buyprice == 0:
                 w_buyprice = price
             else:
@@ -88,18 +97,20 @@ class Arbitrer(object):
 
     def get_max_depth(self, kask, kbid):
         i = 0
-        if len(self.depths[kbid]["bids"]) != 0 and \
-           len(self.depths[kask]["asks"]) != 0:
-            while self.depths[kask]["asks"][i]["price"] \
-                  < self.depths[kbid]["bids"][0]["price"]:
+        # don't iterate if either of the depths are empty
+        if len(self.depths[kbid]["bids"]) != 0 and len(self.depths[kask]["asks"]) != 0:
+            # find the highest ask (on kask) that's still lower than the highest bid (first one)
+            while self.depths[kask]["asks"][i]["price"] < self.depths[kbid]["bids"][0]["price"]:
+                # if we've reached the end of asks then break
                 if i >= len(self.depths[kask]["asks"]) - 1:
                     break
+                # otherwise increment
                 i += 1
         j = 0
-        if len(self.depths[kask]["asks"]) != 0 and \
-           len(self.depths[kbid]["bids"]) != 0:
-            while self.depths[kask]["asks"][0]["price"] \
-                  < self.depths[kbid]["bids"][j]["price"]:
+        if len(self.depths[kask]["asks"]) != 0 and len(self.depths[kbid]["bids"]) != 0:
+            # find the lowest bid (on kbid) that's still higher than the lowest ask (first one)
+            # loop down through the bids to find the lowest one that is still higher than lowest ask
+            while self.depths[kask]["asks"][0]["price"] < self.depths[kbid]["bids"][j]["price"]:
                 if j >= len(self.depths[kbid]["bids"]) - 1:
                     break
                 j += 1
@@ -127,6 +138,7 @@ class Arbitrer(object):
                best_w_buyprice, best_w_sellprice
 
     def arbitrage_opportunity(self, kask, ask, kbid, bid):
+        # perc is unused
         perc = (bid["price"] - ask["price"]) / bid["price"] * 100
         profit, volume, buyprice, sellprice, weighted_buyprice,\
             weighted_sellprice = self.arbitrage_depth_opportunity(kask, kbid)
