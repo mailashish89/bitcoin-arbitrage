@@ -25,12 +25,13 @@ paymium_address = "FIXME"  # to deposit btc from markets / wallets
 bitstamp_username = "FIXME"
 bitstamp_password = "FIXME"
 
+rediscloud_url = os.environ["REDISCLOUD_URL"]
 # SafeGuards
 max_tx_volume = 10  # in BTC
-min_tx_volume = 1  # in BTC
+min_tx_volume = float(os.environ["MIN_TX_VOLUME"]) # in BTC
 balance_margin = 0.05  # 5%
-profit_thresh = 1  # in EUR
-perc_thresh = 2  # in %
+profit_thresh = float(os.environ["PROFIT_THRESH"]) # in USD
+perc_thresh = float(os.environ["PERC_THRESH"]) # in %
 
 #### Emailer Observer Config
 smtp_host = 'FIXME'

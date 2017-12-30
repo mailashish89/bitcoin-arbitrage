@@ -9,6 +9,7 @@ name = "pypi"
 
 ccxt = "*"
 "e1839a8" = {path = ".", editable = true}
+redis = "*"
 
 
 [dev-packages]

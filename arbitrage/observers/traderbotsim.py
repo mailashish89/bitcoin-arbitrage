@@ -1,5 +1,8 @@
 import logging
 import json
+import redis
+import urllib.parse
+from arbitrage import config
 from arbitrage.observers.traderbot import TraderBot
 
 
@@ -49,23 +52,49 @@ class MockMarket(object):
     def get_info(self):
         pass
 
+class MockMarketRedis(MockMarket):
+    def __init__(self, name, fee=0, usd_balance=500., btc_balance=15.):
+        self.name = name
+        self.redis_key = self.name
+        self.usd_balance = usd_balance
+        self.btc_balance = btc_balance
+        self.fee = fee
+        self.persistent = True
+        url = urllib.parse.urlparse(config.rediscloud_url)
+        self.redis = redis.Redis(host=url.hostname, port=url.port, password=url.password)
+
+        if self.redis.get(self.redis_key) is None:
+            # key is not set then save current balance
+            self.save()
+        else:
+            # key is set then load existing balance
+            self.load()
+        
+    def load(self):
+        data = json.loads(self.redis.get(self.redis_key))
+        self.usd_balance = data["usd"]
+        self.btc_balance = data["btc"]
+
+    def save(self):
+        data = {'usd': self.usd_balance, 'btc': self.btc_balance}
+        self.redis.set(self.redis_key, json.dumps(data))
 
 class TraderBotSim(TraderBot):
     def __init__(self):
-        self.kraken = MockMarket("kraken", 0.005, 5000) # 0.5% fee
-        self.paymium = MockMarket("paymium", 0.005, 5000) # 0.5% fee
-        self.bitstamp = MockMarket("bitstamp", 0.005, 5000) # 0.5% fee
-        self.btcc = MockMarket("btcc", 0.005, 5000) # 0.5% fee
-        self.okcoin = MockMarket("okcoin", 0.005, 5000) # 0.5% fee
+        self.kraken =   MockMarketRedis("kraken",   0.005, 500., 0.033) # 0.5% fee
+        self.bitstamp = MockMarketRedis("bitstamp", 0.005, 500., 0.033) # 0.5% fee
+        self.gdax =     MockMarketRedis("gdax",     0.005, 500., 0.033) # 0.5% fee
+        self.bitfinex = MockMarketRedis("bitfinex", 0.005, 500., 0.033) # 0.5% fee
+        self.gemini =   MockMarketRedis("gemini",   0.005, 500., 0.033) # 0.5% fee
         self.clients = {
-            "KrakenEUR": self.kraken,
-            "PaymiumEUR": self.paymium,
+            "KrakenUSD": self.kraken,
             "BitstampUSD": self.bitstamp,
-            "BTCCCNY": self.btcc,
-            "OKCoinCNY": self.okcoin,
+            "GDAXUSD": self.gdax,
+            "BitfinexUSD": self.bitfinex,
+            "GeminiUSD": self.gemini,
         }
-        self.profit_thresh = 10  # in EUR
-        self.perc_thresh = 0.02  # in %
+        self.profit_thresh = config.profit_thresh
+        self.perc_thresh = config.perc_thresh
         self.trade_wait = 120
         self.last_trade = 0
 
